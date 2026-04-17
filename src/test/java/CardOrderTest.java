@@ -5,54 +5,65 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.By;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CardOrderTest {
 
+    WebDriver driver; // переменная драйвера, будет использоваться во всех методах
+
     @BeforeAll
     public static void setupAll() {
-        // один раз скачиваем и настраиваем драйвер для Chrome
+
         WebDriverManager.chromedriver().setup();
     }
 
-    @Test
-    void shouldSubmitFormSuccessfully() {
+    @BeforeEach
+    void setUp() {
 
-        // настраиваем браузер для headless-режима
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--no-sandbox");
         options.addArguments("--headless");
 
-        // создаём драйвер
-        WebDriver driver = new ChromeDriver(options);
 
-        // открываем страницу
+        driver = new ChromeDriver(options);
+
+
         driver.get("http://localhost:9999");
+    }
 
-        // вводим имя (русские буквы)
+    @Test
+    void shouldSubmitFormSuccessfully() {
+
+        // вводим имя (только русские буквы по условию)
         driver.findElement(By.cssSelector("[data-test-id='name'] input"))
                 .sendKeys("Крошка Картошка");
 
-        // вводим телефон
+
         driver.findElement(By.cssSelector("[data-test-id='phone'] input"))
                 .sendKeys("+79991234567");
 
-        // ставим галочку
+        // ставим галочку согласия
         driver.findElement(By.cssSelector("[data-test-id='agreement']"))
                 .click();
 
-        // нажимаем кнопку
+        // нажимаем кнопку отправки формы
         driver.findElement(By.cssSelector("button")).click();
 
-        // проверяем сообщение об успехе
+        // получаем текст сообщения об успешной отправке
         String text = driver.findElement(By.cssSelector("[data-test-id='order-success']"))
                 .getText();
 
-        assertTrue(text.contains("успешно отправлена"));
+        // проверяем, что сообщение содержит ожидаемый текст
+        assertTrue(text.contains("Ваша заявка успешно отправлена"));
+    }
 
-        // закрываем браузер
+    @AfterEach
+    void tearDown() {
+        // закрываем браузер после каждого теста
         driver.quit();
     }
 }
