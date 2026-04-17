@@ -3,6 +3,7 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.By;
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,25 +17,40 @@ public class CardOrderTest {
     }
 
     @Test
-    void shouldOpenPage() {
+    void shouldSubmitFormSuccessfully() {
 
-        // настраиваем браузер для запуска в headless-режиме
+        // настраиваем браузер для headless-режима
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--no-sandbox");
         options.addArguments("--headless");
 
-        // создаём экземпляр браузера Chrome с настройками
+        // создаём драйвер
         WebDriver driver = new ChromeDriver(options);
 
-        // открываем страницу приложения
+        // открываем страницу
         driver.get("http://localhost:9999");
 
-        // получаем заголовок страницы
-        String actualTitle = driver.getTitle();
+        // вводим имя (русские буквы)
+        driver.findElement(By.cssSelector("[data-test-id='name'] input"))
+                .sendKeys("Крошка Картошка");
 
-        // проверяем, что страница содержит нужный текст
-        assertTrue(actualTitle.contains("Заявка"));
+        // вводим телефон
+        driver.findElement(By.cssSelector("[data-test-id='phone'] input"))
+                .sendKeys("+79991234567");
+
+        // ставим галочку
+        driver.findElement(By.cssSelector("[data-test-id='agreement']"))
+                .click();
+
+        // нажимаем кнопку
+        driver.findElement(By.cssSelector("button")).click();
+
+        // проверяем сообщение об успехе
+        String text = driver.findElement(By.cssSelector("[data-test-id='order-success']"))
+                .getText();
+
+        assertTrue(text.contains("успешно отправлена"));
 
         // закрываем браузер
         driver.quit();
